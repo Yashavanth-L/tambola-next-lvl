@@ -3,6 +3,15 @@ from firebase_admin import credentials, db
 import streamlit as st
 import json
 import os
+import re
+
+def clean_json_string(json_str):
+    """Clean JSON string by removing control characters and normalizing newlines."""
+    # Remove control characters except \n
+    json_str = re.sub(r'[\x00-\x1F\x7F-\x9F]', '', json_str)
+    # Normalize newlines
+    json_str = json_str.replace('\\n', '\n').replace('\n', '\\n')
+    return json_str
 
 def init_firebase() -> None:
     """
@@ -26,7 +35,9 @@ def init_firebase() -> None:
                 # If the key is a string, try to parse it as JSON
                 if isinstance(firebase_key, str):
                     try:
-                        cred_dict = json.loads(firebase_key)
+                        # Clean the JSON string
+                        cleaned_key = clean_json_string(firebase_key)
+                        cred_dict = json.loads(cleaned_key)
                     except json.JSONDecodeError as e:
                         st.error(f"Invalid JSON format in Firebase key: {str(e)}")
                         raise Exception(f"Invalid JSON format in Firebase key: {str(e)}")
