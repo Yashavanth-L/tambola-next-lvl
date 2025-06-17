@@ -28,7 +28,11 @@ def create_game_room(player_names):
 
 def generate_join_links(room_id, player_names):
     """Generate join links and QR codes for players"""
-    base_url = "http://localhost:8501"
+    # Get the current URL from Streamlit
+    base_url = st.experimental_get_query_params().get("base_url", [st.get_option("server.address")])[0]
+    if not base_url.startswith("http"):
+        base_url = f"https://{base_url}"
+    
     join_details = []
     
     for name in player_names:

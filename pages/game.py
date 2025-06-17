@@ -26,6 +26,12 @@ if player_name:
 # Validate params and room_id format
 if not room_id or len(room_id) != 6 or not player_name:
     st.error("Invalid or missing game link. Please use the join link provided by the host.")
+    st.markdown("""
+    ### How to join the game:
+    1. Ask the host to create a game room
+    2. Use the join link or QR code provided by the host
+    3. Make sure you're using the correct link for your player name
+    """)
     st.stop()
 
 # Get room data
