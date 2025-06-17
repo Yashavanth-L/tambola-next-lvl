@@ -23,11 +23,17 @@ def init_firebase() -> None:
             # Get Firebase credentials from Streamlit secrets
             try:
                 firebase_key = st.secrets["firebase_key"]
-                cred_dict = json.loads(firebase_key)
+                # If the key is a string, try to parse it as JSON
+                if isinstance(firebase_key, str):
+                    try:
+                        cred_dict = json.loads(firebase_key)
+                    except json.JSONDecodeError as e:
+                        st.error(f"Invalid JSON format in Firebase key: {str(e)}")
+                        raise Exception(f"Invalid JSON format in Firebase key: {str(e)}")
+                else:
+                    cred_dict = firebase_key
+                
                 cred = credentials.Certificate(cred_dict)
-            except json.JSONDecodeError:
-                st.error("Invalid Firebase key format in Streamlit secrets. Please check your Firebase credentials.")
-                raise Exception("Invalid Firebase key format")
             except Exception as e:
                 st.error(f"Error processing Firebase credentials: {str(e)}")
                 raise Exception(f"Error processing Firebase credentials: {str(e)}")
