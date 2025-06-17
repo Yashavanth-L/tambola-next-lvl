@@ -5,10 +5,17 @@ from firebase_admin import db
 from firebase import init_firebase, get_room_ref
 from ticket_generator import generate_ticket
 import random
-from streamlit_autorefresh import st_autorefresh
 import pandas as pd
 import numpy as np
 import time
+
+# Try to import autorefresh, but don't fail if it's not available
+try:
+    from streamlit_autorefresh import st_autorefresh
+    AUTOREFRESH_AVAILABLE = True
+except ImportError:
+    AUTOREFRESH_AVAILABLE = False
+    st.warning("Auto-refresh is not available. The page will need to be manually refreshed to see updates.")
 
 # Initialize Firebase
 init_firebase()
@@ -81,8 +88,13 @@ def auto_refresh():
         if len(latest_called_numbers) > len(current_called_numbers):
             st.rerun()
 
-# Set up auto-refresh with a shorter interval (2 seconds)
-st_autorefresh(interval=2000, key="game_refresh")
+# Set up auto-refresh with a shorter interval (2 seconds) if available
+if AUTOREFRESH_AVAILABLE:
+    st_autorefresh(interval=2000, key="game_refresh")
+else:
+    # Add a manual refresh button
+    if st.button("🔄 Refresh Game"):
+        st.rerun()
 
 # --- Tambola Ticket UI ---
 st.title(f"Welcome, {player_name}!")
