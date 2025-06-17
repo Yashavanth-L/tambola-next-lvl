@@ -23,6 +23,7 @@ def init_firebase() -> None:
                 'databaseURL': database_url
             })
         except Exception as e:
+            st.error(f"Failed to initialize Firebase. Please check your Streamlit secrets configuration.")
             raise Exception(f"Failed to initialize Firebase: {str(e)}")
 
 def get_room_ref(room_id: str) -> db.Reference:
