@@ -1,5 +1,5 @@
 import streamlit as st
-st.set_page_config(initial_sidebar_state="collapsed")
+st.set_page_config(initial_sidebar_state="collapsed", layout="wide")
 import firebase_admin
 from firebase_admin import db
 from firebase import init_firebase, get_room_ref
@@ -114,47 +114,54 @@ if player_name == room_data.get("host"):
             room_ref.update({"called_numbers": called_numbers})
             st.rerun()
 
-st.markdown("### 🎫 Your Tambola Ticket:")
+# Create two columns for the layout
+col1, col2 = st.columns([0.6, 0.4])
 
-# Get called numbers
-called_numbers = room_data.get("called_numbers", [])
+with col1:
+    st.markdown("### 🎫 Your Tambola Ticket:")
 
-# Render the ticket as a single HTML table for proper alignment
-cell_style = "height:40px;width:40px;text-align:center;font-size:20px;border:1.5px solid #222;"
-alt_bg = "background-color:#ffe5cc;"
-table_html = '<div style="display:inline-block;border:5px solid black;padding:8px;margin-bottom:10px;">'
-table_html += '<div style="text-align:center;font-weight:bold;font-size:18px;margin-bottom:10px;">Tambola ticket</div>'
-table_html += '<table style="border-collapse:collapse;margin:auto;">'
-for row_idx, row in enumerate(ticket):
-    table_html += '<tr>'
-    for col_idx, val in enumerate(row):
-        style = cell_style
-        if (row_idx + col_idx) % 2 == 0:
-            style += alt_bg
-        if val == 0:
-            table_html += f'<td style="{style}"></td>'
-        else:
-            if val in called_numbers:
-                if marked[row_idx][col_idx]:
-                    # Number is called and marked
-                    table_html += f'<td style="{style};background:#f9d6d5;border:2px solid #d9534f;"><s>{val}</s></td>'
-                else:
-                    # Number is called but not marked
-                    table_html += f'<td style="{style};background:#dff0d8;border:2px solid #5cb85c;">{val}</td>'
+    # Get called numbers
+    called_numbers = room_data.get("called_numbers", [])
+
+    # Render the ticket as a single HTML table for proper alignment
+    cell_style = "height:40px;width:40px;text-align:center;font-size:20px;border:1.5px solid #222;"
+    alt_bg = "background-color:#ffe5cc;"
+    table_html = '<div style="display:inline-block;border:5px solid black;padding:8px;margin-bottom:10px;">'
+    table_html += '<div style="text-align:center;font-weight:bold;font-size:18px;margin-bottom:10px;">Tambola ticket</div>'
+    table_html += '<table style="border-collapse:collapse;margin:auto;">'
+    for row_idx, row in enumerate(ticket):
+        table_html += '<tr>'
+        for col_idx, val in enumerate(row):
+            style = cell_style
+            if (row_idx + col_idx) % 2 == 0:
+                style += alt_bg
+            if val == 0:
+                table_html += f'<td style="{style}"></td>'
             else:
-                # Number is not called yet
-                table_html += f'<td style="{style}">{val}</td>'
-    table_html += '</tr>'
-table_html += '</table></div>'
-st.markdown(table_html, unsafe_allow_html=True)
+                if val in called_numbers:
+                    if marked[row_idx][col_idx]:
+                        # Number is called and marked
+                        table_html += f'<td style="{style};background:#f9d6d5;border:2px solid #d9534f;"><s>{val}</s></td>'
+                    else:
+                        # Number is called but not marked
+                        table_html += f'<td style="{style};background:#dff0d8;border:2px solid #5cb85c;">{val}</td>'
+                else:
+                    # Number is not called yet
+                    table_html += f'<td style="{style}">{val}</td>'
+        table_html += '</tr>'
+    table_html += '</table></div>'
+    st.markdown(table_html, unsafe_allow_html=True)
 
-# Show called numbers
-st.markdown("### 📢 Called Numbers:")
-if called_numbers:
-    st.write(", ".join(map(str, called_numbers)))
-else:
-    st.write("No numbers called yet")
+    # Show called numbers
+    st.markdown("### 📢 Called Numbers:")
+    if called_numbers:
+        st.write(", ".join(map(str, called_numbers)))
+    else:
+        st.write("No numbers called yet")
 
+with col2:
+    st.markdown("### 🏆 Game Achievements")
+    
 # --- Tambola Achievements Logic ---
 def check_achievements():
     achievements = room_data.get("achievements", {})
@@ -178,16 +185,7 @@ def check_achievements():
             st.balloons()
             st.success(f"🎯 Congratulations! {player_name} has achieved First 5! 🎉")
     
-    # 2. Corner Fours
-    if "corners" not in achievements:
-        corners = [(0,0), (0,8), (2,0), (2,8)]
-        if all(ticket[r][c] != 0 and marked[r][c] for r, c in corners):
-            achievements["corners"] = player_name
-            updated = True
-            st.balloons()
-            st.success(f"🎲 Congratulations! {player_name} has achieved Corner Fours! 🎉")
-    
-    # 3. First Line
+    # 2. First Line
     if "firstline" not in achievements:
         if count_marked_in_row(0) == 5:
             achievements["firstline"] = player_name
@@ -195,7 +193,7 @@ def check_achievements():
             st.balloons()
             st.success(f"1️⃣ Congratulations! {player_name} has completed the First Line! 🎉")
     
-    # 4. Second Line
+    # 3. Second Line
     if "secondline" not in achievements:
         if count_marked_in_row(1) == 5:
             achievements["secondline"] = player_name
@@ -203,7 +201,7 @@ def check_achievements():
             st.balloons()
             st.success(f"2️⃣ Congratulations! {player_name} has completed the Second Line! 🎉")
     
-    # 5. Last Line
+    # 4. Last Line
     if "lastline" not in achievements:
         if count_marked_in_row(2) == 5:
             achievements["lastline"] = player_name
@@ -211,7 +209,7 @@ def check_achievements():
             st.balloons()
             st.success(f"3️⃣ Congratulations! {player_name} has completed the Last Line! 🎉")
     
-    # 6. Full Housie (Multiple Winners)
+    # 5. Full Housie (Multiple Winners)
     if player_name not in housie_winners:  # Check if this player hasn't won yet
         if count_total_marked() == 15:  # All numbers are marked
             housie_winners.append(player_name)
@@ -239,117 +237,31 @@ def check_achievements():
 # --- Display Achievements ---
 achievements = check_achievements()
 
-# Create a container for achievements with custom styling
-st.markdown("""
-    <style>
-    .achievement-container {
-        background-color: #f0f2f6;
-        border-radius: 10px;
-        padding: 20px;
-        margin: 10px 0;
-    }
-    .achievement-title {
-        color: #1f77b4;
-        font-size: 24px;
-        font-weight: bold;
-        margin-bottom: 15px;
-    }
-    .achievement-item {
-        background-color: white;
-        border-radius: 8px;
-        padding: 10px 15px;
-        margin: 8px 0;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .achievement-winner {
-        color: #28a745;
-        font-weight: bold;
-    }
-    .achievement-pending {
-        color: #6c757d;
-    }
-    .housie-winners {
-        background-color: #fff3cd;
-        border-radius: 8px;
-        padding: 15px;
-        margin-top: 15px;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
-# Main achievements section
-st.markdown('<div class="achievement-container">', unsafe_allow_html=True)
-st.markdown('<div class="achievement-title">🏆 Game Achievements</div>', unsafe_allow_html=True)
-
-# Regular achievements with improved styling
-achievement_labels = [
-    ("first5", "First 5 🎯", "Be the first to mark 5 numbers"),
-    ("corners", "Corner Fours 🎲", "Mark all four corner numbers"),
-    ("firstline", "First Line 1️⃣", "Complete the first line"),
-    ("secondline", "Second Line 2️⃣", "Complete the second line"),
-    ("lastline", "Last Line 3️⃣", "Complete the last line")
-]
-
-for key, label, description in achievement_labels:
-    winner = achievements.get(key)
-    if winner:
-        st.markdown(f"""
-            <div class="achievement-item">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <strong>{label}</strong><br>
-                        <small>{description}</small>
-                    </div>
-                    <div class="achievement-winner">Winner: {winner} 🌟</div>
-                </div>
-            </div>
-        """, unsafe_allow_html=True)
+# Display current achievements in the right column
+with col2:
+    achievement_list = [
+        ("🎯 First 5", "first5"),
+        ("1️⃣ First Line", "firstline"),
+        ("2️⃣ Second Line", "secondline"),
+        ("3️⃣ Last Line", "lastline")
+    ]
+    
+    for label, key in achievement_list:
+        winner = achievements.get(key)
+        if winner:
+            st.success(f"{label}: {winner}")
+        else:
+            st.info(f"{label}: Not achieved yet")
+    
+    # Display Full Housie winners
+    st.markdown("### 🏆 Full Housie Winners")
+    housie_winners = achievements.get("fullhousie_winners", [])
+    if housie_winners:
+        for idx, winner in enumerate(housie_winners, 1):
+            suffix = {1: "st", 2: "nd", 3: "rd"}.get(idx, "th")
+            st.success(f"{idx}{suffix} Place: {winner}")
     else:
-        st.markdown(f"""
-            <div class="achievement-item">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <strong>{label}</strong><br>
-                        <small>{description}</small>
-                    </div>
-                    <div class="achievement-pending">Not claimed yet</div>
-                </div>
-            </div>
-        """, unsafe_allow_html=True)
-
-# Full Housie winners section
-st.markdown('<div class="housie-winners">', unsafe_allow_html=True)
-st.markdown('<div class="achievement-title">🏆 Full Housie Winners</div>', unsafe_allow_html=True)
-
-housie_winners = achievements.get("fullhousie_winners", [])
-if housie_winners:
-    for idx, winner in enumerate(housie_winners, 1):
-        suffix = {1: "st", 2: "nd", 3: "rd"}.get(idx, "th")
-        st.markdown(f"""
-            <div class="achievement-item">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <strong>{idx}{suffix} Place</strong><br>
-                        <small>Complete all numbers on the ticket</small>
-                    </div>
-                    <div class="achievement-winner">{winner} 🌟</div>
-                </div>
-            </div>
-        """, unsafe_allow_html=True)
-else:
-    st.markdown("""
-        <div class="achievement-item">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <strong>Full Housie</strong><br>
-                    <small>Complete all numbers on the ticket</small>
-                </div>
-                <div class="achievement-pending">Not claimed yet</div>
-            </div>
-        </div>
-    """, unsafe_allow_html=True)
-
-st.markdown('</div></div>', unsafe_allow_html=True)
+        st.info("No winners yet")
 
 # Auto-mark called numbers
 if called_numbers:
