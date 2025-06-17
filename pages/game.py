@@ -1,17 +1,17 @@
 import streamlit as st
 st.set_page_config(initial_sidebar_state="collapsed")
 import firebase_admin
-from firebase_admin import credentials, db
+from firebase_admin import db
+from firebase import init_firebase, get_room_ref
 from ticket_generator import generate_ticket
 import random
 from streamlit_autorefresh import st_autorefresh
+import pandas as pd
+import numpy as np
+import time
 
-# Initialize Firebase only once
-if not firebase_admin._apps:
-    cred = credentials.Certificate("firebase_key.json")
-    firebase_admin.initialize_app(cred, {
-        'databaseURL': 'https://tambola-game-f9536-default-rtdb.asia-southeast1.firebasedatabase.app/'
-    })
+# Initialize Firebase
+init_firebase()
 
 # Get URL parameters
 room_id = st.query_params.get("room_id", None)
@@ -29,7 +29,7 @@ if not room_id or len(room_id) != 6 or not player_name:
     st.stop()
 
 # Get room data
-room_ref = db.reference(f"rooms/{room_id}")
+room_ref = get_room_ref(room_id)
 room_data = room_ref.get()
 
 if not room_data:

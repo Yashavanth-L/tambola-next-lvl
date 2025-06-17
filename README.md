@@ -3,51 +3,76 @@
 A multiplayer Tambola (Housie) game built with Streamlit and Firebase.
 
 ## Features
-- Multiplayer support
-- Real-time game updates
-- QR code generation for easy joining
-- Interactive ticket marking
-- Achievement tracking
-- Winner display
+
+- Real-time multiplayer gameplay
+- Automatic ticket generation
+- Number calling system
+- Win pattern validation
+- Player statistics
 
 ## Setup
 
-1. Clone the repository
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/tambola-next-lvl.git
+cd tambola-next-lvl
+```
+
 2. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
 3. Set up Firebase:
-   - Create a Firebase project
-   - Enable Realtime Database
-   - Download your Firebase service account key and save it as `firebase_key.json`
+- Create a Firebase project
+- Enable Realtime Database
+- Create a service account and download the credentials
 
-## Deployment
+4. Set up Streamlit secrets:
+- Create a `.streamlit/secrets.toml` file
+- Add your Firebase credentials:
+```toml
+firebase_key = """
+{
+    "type": "service_account",
+    "project_id": "YOUR_PROJECT_ID",
+    "private_key_id": "YOUR_PRIVATE_KEY_ID",
+    "private_key": "YOUR_PRIVATE_KEY",
+    "client_email": "YOUR_CLIENT_EMAIL",
+    "client_id": "YOUR_CLIENT_ID",
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+    "token_uri": "https://oauth2.googleapis.com/token",
+    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+    "client_x509_cert_url": "YOUR_CERT_URL"
+}
+"""
 
-### Deploying to Streamlit Cloud
+FIREBASE_DATABASE_URL = "YOUR_FIREBASE_DATABASE_URL"
+```
 
-1. Create a GitHub repository and push your code
-2. Go to [share.streamlit.io](https://share.streamlit.io)
-3. Sign in with your GitHub account
-4. Click "New app"
-5. Select your repository, branch, and main file (app.py)
-6. Add your Firebase credentials as secrets:
-   - Go to your app settings
-   - Add a new secret with key `firebase_key` and value as the contents of your `firebase_key.json`
-
-### Environment Variables
-Make sure to set these in your deployment environment:
-- `FIREBASE_DATABASE_URL`: Your Firebase Realtime Database URL
-
-## Local Development
-
-Run the app locally:
+5. Run the application:
 ```bash
 streamlit run app.py
 ```
 
+## Deployment
+
+1. Create a Streamlit account at https://streamlit.io
+2. Install Streamlit CLI:
+```bash
+pip install streamlit
+```
+3. Deploy to Streamlit:
+```bash
+streamlit deploy
+```
+
 ## Security Notes
-- Never commit `firebase_key.json` to version control
-- Use environment variables for sensitive data
-- Keep your Firebase rules secure 
+
+- Keep your Streamlit secrets secure
+- Never commit `.streamlit/secrets.toml` to version control
+- Keep your Firebase rules secure
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request. 
