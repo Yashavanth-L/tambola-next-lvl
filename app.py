@@ -34,7 +34,9 @@ def generate_join_links(room_id, player_names):
     join_details = []
     
     for name in player_names:
-        join_link = f"{base_url}/game?room_id={room_id}&player_name={name}"
+        # URL encode the player name to handle special characters
+        encoded_name = name.replace(" ", "%20")
+        join_link = f"{base_url}/game?room_id={room_id}&player_name={encoded_name}"
         qr = qrcode.make(join_link)
         buf = BytesIO()
         qr.save(buf)
